@@ -11,10 +11,10 @@ from isac.params import OFDMRadarParams
 
 @dataclass(frozen=True)
 class Target:
-    range_m: float          # distance from the radar [m]
-    velocity_mps: float     # radial velocity [m/s], positive = approaching the radar
-    gain_db: float = 0.0    # echo power relative to a reference target [dB]
-
+    range_m: float                   # distance from the radar [m]
+    velocity_mps: float              # radial velocity [m/s], positive = approaching the radar
+    gain_db: float = 0.0             # echo power relative to a reference target [dB]
+    phase_rad: float | None = None   # echo phase; None = random (realistic)
 
 # Example scene reused by later steps and experiments
 DEFAULT_SCENE = [
@@ -53,7 +53,8 @@ def simulate_echo(params, X, targets, snr_db=None, rng=None):
     for t in targets:
         tau = 2 * t.range_m / c                          # round-trip delay
         f_d = 2 * t.velocity_mps / params.wavelength     # Doppler shift
-        amplitude = 10 ** (t.gain_db / 20) * np.exp(1j * rng.uniform(0, 2 * np.pi))
+        phase = rng.uniform(0, 2 * np.pi) if t.phase_rad is None else t.phase_rad
+        amplitude = 10 ** (t.gain_db / 20) * np.exp(1j * phase)
         H += (amplitude
               * np.exp(-1j * 2 * np.pi * n * params.delta_f * tau)
               * np.exp(1j * 2 * np.pi * m * params.T_sym * f_d))
