@@ -10,7 +10,6 @@ def _gray(n):
     """Binary-reflected Gray code of an integer or integer array."""
     return n ^ (n >> 1)
 
-
 def _check_order(order):
     k = int(np.log2(order))
     m = int(round(np.sqrt(order)))
