@@ -73,6 +73,41 @@ Three objects in one scene:
 
 **Why this is impressive:** before processing, each echo was weaker than the noise. The FFTs add up the whole frame, about 262,000 values, which makes the objects stand out clearly, 29 to 44 dB above the noise. The pedestrian is the weakest reflector but is still easy to see.
 
+### 4. Automatic detection
+
+![Detections](results/detections.png)
+
+The radar finds the objects by itself: a spot counts as an object if it is the highest point
+in its area and more than 15 dB above the noise. All 3 objects were found, with no false alarms.
+
+| Object | True distance | Measured | True speed | Measured |
+|---|---|---|---|---|
+| Pedestrian | 30.00 m | 29.98 m | −1.50 m/s | −1.70 m/s |
+| Car | 80.00 m | 79.98 m | +20.00 m/s | +19.95 m/s |
+| Truck | 150.00 m | 149.99 m | −12.00 m/s | −12.12 m/s |
+
+**Resolution vs accuracy:** the radar can only *separate* objects that are at least 1.22 m apart,
+but it can *locate* a single object much more precisely, here to within 2 cm, by interpolating
+between FFT bins.
+
+### 5. More bandwidth separates close objects
+
+![Resolution vs bandwidth](results/resolution_vs_bandwidth.png)
+
+Two objects 3 m apart, measured with four bandwidths:
+
+| Bandwidth | Resolution | Result |
+|---|---|---|
+| 31 MHz | 4.88 m | Merged: seen as one object |
+| 61 MHz | 2.44 m | Just separated, positions slightly off |
+| 123 MHz | 1.22 m | Clearly separated, correct positions |
+| 246 MHz | 0.61 m | Fully separated |
+
+More bandwidth means sharper peaks, so closer objects can be told apart. In practice the
+resolution is a bit worse than the formula c/2B, because the window that suppresses
+sidelobes also widens each peak. This is why 6G research looks at bands with much more
+bandwidth, such as 7–24 GHz and above 100 GHz.
+
 ---
 
 ## Simplifications
@@ -87,8 +122,8 @@ This is a simulation, so some real-world effects are left out for now:
 ## How to run
 
 ```bash
-git clone https://github.com/<your-username>/ofdm-isac-radar.git
-cd ofdm-isac-radar
+git clone https://github.com/<your-username>/ofdm-radar.git
+cd ofdm-radar
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
